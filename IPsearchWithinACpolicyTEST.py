@@ -58,36 +58,7 @@ class TestAPIMethods(unittest.TestCase):
 		self.assertTrue(ipaddress.ip_address(apiGET.sanitizeInput(arguments)))
 
 
-	def test_default_api_call_to_bad_IP(self):
-		"""
-		test our API GET method which returns the supported API versions,
-		in this case 'v5', 'v6', and 'latest'
-		this test will fail because the IP address 192.168.45.45 does not exist
-		"""
-		with self.assertRaises(SystemExit) as e:
-			apiGET.getVersions("192.168.45.45")
-		self.assertEqual(e.exception.code, 1)
-
-
-	def test_default_api_call_to_no_API(self):
-		"""
-		test our API GET method which returns the supported API versions,
-		in this case 'v5', 'v6', and 'latest'
-		this test will fail because the IP address does exist but does not have an exposed API
-		"""
-		with self.assertRaises(SystemExit) as e:
-			apiGET.getVersions('192.168.10.254')
-		self.assertEqual(e.exception.code, 1)
-
-
-	def test_default_api_call(self):
-		"""
-		test our API GET method which returns the supported API versions,
-		in this case 'v5', 'v6', and 'latest'
-		this test will succeed because the IP address does exist and will respond
-		"""
-		getVersions = apiGET.getVersions('192.168.10.196')[0]
-		self.assertEqual(getVersions.text, '{\n    "supportedVersions":["v5", "v6", "latest"]\n}\n')
+	
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 ###### Requirements to run IPsearchWithinACpolicy.py ######
 ipaddress
-json
-os
+# json — built-in module
+# os — built-in module
 requests
-sys
+# sys — built-in module
