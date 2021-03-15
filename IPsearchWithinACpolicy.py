@@ -195,4 +195,11 @@ if __name__ == "__main__":
     # next find the IP we are looking for from within that list 
     # of objects if it exists and store the object id for further processing
     matchFromObjects = ipDict[queriedIP]
+
+
+    # still need to do the following:
+    #   1. get rules from each individual AC policy
+    #   2. determine if the IP being searched for exists within objects
+    #       2a. if exists in objects, add each object into the search list
+    #   3. iterate through the list of search matches (IP and objects) against rule contents
     
