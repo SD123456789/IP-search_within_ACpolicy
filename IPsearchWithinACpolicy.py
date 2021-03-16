@@ -132,28 +132,33 @@ if __name__ == "__main__":
     # then make sure that the FMC IP is valid
     try:
         fmcIP = FMCexists(fmcIP)
-    except:
-        exit(1)
+    except Exception as err:
+        raise SystemExit(err)
 
     
     # next get a valid token
     apiPath = "/api/fmc_platform/v1/auth/generatetoken"
-    authHeader = get_token(fmcIP, apiPath, user, passwd)
-
-
+    try:
+        authHeader = get_token(fmcIP, apiPath, user, passwd)
+    except Exception as err:
+        raise SystemExit(err)
 
     """ GETTING NETWORK OBJECTS """
     # get all networkgroups from the FMC
     # set the path to the network groups and expand them for values
     apiPath = "object/networkgroups?expanded=true"
-    networkObjectGroups = getFunction(fmcIP, apiPath, authHeader)
-
+    try:
+        networkObjectGroups = getFunction(fmcIP, apiPath, authHeader)
+    except Exception as err:
+        raise SystemExit(err)
 
     # next grab all network objects from the FMC
     # set the path to get network objects and expand them for values
     apiPath = "object/networks?expanded=true"
-    networkObjects = getFunction(fmcIP, apiPath, authHeader)
-
+    try:
+        networkObjects = getFunction(fmcIP, apiPath, authHeader)
+    except Exception as err:
+        raise SystemExit(err)
 
     # then pull all IP addresses from each network object and object group
     # saving them in a dict of the form object:[list, of, IPs]
@@ -173,8 +178,10 @@ if __name__ == "__main__":
     """ GETTING HOSTS """
     # change the path 
     apiPath = "object/hosts?expanded=true"
-    hostObjects = getFunction(fmcIP, apiPath, authHeader)
-
+    try:
+        hostObjects = getFunction(fmcIP, apiPath, authHeader)
+    except Exception as err:
+        raise SystemExit(err)
 
     # add the hosts to the dictionary
     for hostObject in hostObjects['items']:
@@ -183,23 +190,30 @@ if __name__ == "__main__":
     """ GRABBING ACCESS CONTROL POLICIES and RULES """
     # change the path and download all AC policies
     apiPath = "policy/accesspolicies?expanded=false"
-    acPolicies = getFunction(fmcIP, apiPath, authHeader)
-
+    try:
+        acPolicies = getFunction(fmcIP, apiPath, authHeader)
+    except Exception as err:
+        raise SystemExit(err)
 
     # go into each AC policy and get an expanded view of each policy element
     # store in the "rules" key of each AC policy
+    for acPolicy in acPolicies['items']:
+        apiPath = f"policy/accesspolicies/{acPolicy['id']}/accessrules?expanded=true"
+        try:
+            acPolicy['rules'] = getFunction(fmcIP, apiPath, authHeader)
+        except Exception as err:
+            raise SystemExit(err)
 
-    for policy in acPolicies['items']:
-        print(policy['name'])
 
     # next find the IP we are looking for from within that list 
     # of objects if it exists and store the object id for further processing
     matchFromObjects = ipDict[queriedIP]
 
 
+    pprint.pprint(ipDict)
+
     # still need to do the following:
-    #   1. get rules from each individual AC policy
-    #   2. determine if the IP being searched for exists within objects
-    #       2a. if exists in objects, add each object into the search list
-    #   3. iterate through the list of search matches (IP and objects) against rule contents
+    #   1. determine if the IP being searched for exists within objects
+    #       1a. if exists in objects, add each object into the search list
+    #   2. iterate through the list of search matches (IP and objects) against rule contents
     
