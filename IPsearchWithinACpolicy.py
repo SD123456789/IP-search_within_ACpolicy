@@ -205,12 +205,16 @@ if __name__ == "__main__":
             raise SystemExit(err)
 
 
+
+
     # next find the IP we are looking for from within that list 
     # of objects if it exists and store the object id for further processing
-    matchFromObjects = ipDict[queriedIP]
-
-
-    pprint.pprint(ipDict)
+    for ip in ipDict:
+        try:
+            if queriedIP.subnet_of(ip):
+                print(f"{queriedIP} can be found in {ipDict[ip]}") 
+        except TypeError:
+            pass
 
     # still need to do the following:
     #   1. determine if the IP being searched for exists within objects
