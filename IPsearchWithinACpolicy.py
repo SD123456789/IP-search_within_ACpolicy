@@ -230,28 +230,28 @@ if __name__ == "__main__":
                         if 'literals' in rule['sourceNetworks']:
                             for literal in rule['sourceNetworks']['literals']:
                                 if queriedIP.subnet_of(ipaddress.ip_network(literal['value'])) or (queriedIP == ipaddress.ip_network(literal['value'])):
-                                    tempStr = f"the IP we're looking for ({queriedIP}) is used in a source network in the ACPolicy named {acPolicy['name']}\nrule:{rule}"
+                                    tempStr = f"the IP we're looking for ({queriedIP}) is used in a source network in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{rule}"
                                     if tempStr not in policyMatches:
                                         policyMatches.append(tempStr)
                         if 'objects' in rule['sourceNetworks']:
                             for ipKey, ipValue in ipMatches.items():
                                 for object in rule['sourceNetworks']['objects']:
                                     if queriedIP.subnet_of(ipKey) or (queriedIP == ipKey):
-                                        tempStr = f"the IP we're looking for ({queriedIP}) is used in a source object in the ACPolicy named {acPolicy['name']}\nrule:{rule}"
+                                        tempStr = f"the IP we're looking for ({queriedIP}) is used in a source object in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{rule}"
                                         if tempStr not in policyMatches:
                                             policyMatches.append(tempStr)
                     if 'destinationNetworks' in rule:
                         if 'literals' in rule['destinationNetworks']:
                             for literal in rule['destinationNetworks']['literals']:
                                 if queriedIP.subnet_of(ipaddress.ip_network(literal['value'])) or (queriedIP == ipaddress.ip_network(literal['value'])):
-                                    tempStr = f"the IP we're looking for ({queriedIP}) is used in a destination network in the ACPolicy named {acPolicy['name']}\nrule:{rule}"
+                                    tempStr = f"the IP we're looking for ({queriedIP}) is used in a destination network in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{rule}"
                                     if tempStr not in policyMatches:
                                         policyMatches.append(tempStr)
                         if 'objects' in rule['destinationNetworks']:
                             for ipKey, ipValue in ipMatches.items():
                                 for object in rule['destinationNetworks']['objects']:
                                     if queriedIP.subnet_of(ipKey) or (queriedIP == ipKey):
-                                        tempStr = f"the IP we're looking for ({queriedIP}) is used in a destination object in the ACPolicy named {acPolicy['name']}\nrule:{rule}"
+                                        tempStr = f"the IP we're looking for ({queriedIP}) is used in a destination object in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{rule}"
                                         if tempStr not in policyMatches:
                                             policyMatches.append(tempStr)
     
