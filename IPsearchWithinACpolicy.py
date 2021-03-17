@@ -221,6 +221,7 @@ if __name__ == "__main__":
     # now doubly iterate through the access control policies and see if the
     # IP address we are searching for does exist within one of them, either 
     # as a raw IP or contained within an object
+    policyMatches = []
     for acPolicy in acPolicies['items']:
         for acpKey, acpValue in acPolicy['rules'].items():
             if (acpKey == 'items'):
@@ -229,21 +230,32 @@ if __name__ == "__main__":
                         if 'literals' in rule['sourceNetworks']:
                             for literal in rule['sourceNetworks']['literals']:
                                 if queriedIP.subnet_of(ipaddress.ip_network(literal['value'])) or (queriedIP == ipaddress.ip_network(literal['value'])):
-                                    print(f"the IP we're looking for ({queriedIP}) is used in the rule {rule['name']} in the ACPolicy named {acPolicy['name']}")
-                                    ipMatches.update({ipaddress.ip_network(literal['value']):[rule['name'],acPolicy['name']]})
+                                    tempStr = f"the IP we're looking for ({queriedIP}) is used in a source network in the rule {rule['name']} in the ACPolicy named {acPolicy['name']}"
+                                    if tempStr not in policyMatches:
+                                        policyMatches.append(tempStr)
                         if 'objects' in rule['sourceNetworks']:
-#                            print(f"source objects are: {rule['sourceNetworks']['objects']}")
-                            pass
+                            for ipKey, ipValue in ipMatches.items():
+                                for object in rule['sourceNetworks']['objects']:
+                                    if queriedIP.subnet_of(ipKey) or (queriedIP == ipKey):
+                                        tempStr = f"the IP we're looking for ({queriedIP}) is used in a source object in the rule {rule['name']} in the ACPolicy named {acPolicy['name']}"
+                                        if tempStr not in policyMatches:
+                                            policyMatches.append(tempStr)
                     if 'destinationNetworks' in rule:
                         if 'literals' in rule['destinationNetworks']:
                             for literal in rule['destinationNetworks']['literals']:
                                 if queriedIP.subnet_of(ipaddress.ip_network(literal['value'])) or (queriedIP == ipaddress.ip_network(literal['value'])):
-                                    print(f"the IP we're looking for ({queriedIP}) is used in the rule {rule['name']} in the ACPolicy named {acPolicy['name']}")
-                                    ipMatches.update({ipaddress.ip_network(literal['value']):[rule['name'],acPolicy['name']]})
+                                    tempStr = f"the IP we're looking for ({queriedIP}) is used in a destination network in the rule {rule['name']} in the ACPolicy named {acPolicy['name']}"
+                                    if tempStr not in policyMatches:
+                                        policyMatches.append(tempStr)
                         if 'objects' in rule['destinationNetworks']:
-#                            print(f"dest objects are: {rule['destinationNetworks']['objects']}")
-                            pass
-
-
-    #   2. iterate through the list of search matches (IP and objects) against rule contents
-    #pprint.pprint(ipMatches)
+                            for ipKey, ipValue in ipMatches.items():
+                                for object in rule['destinationNetworks']['objects']:
+                                    if queriedIP.subnet_of(ipKey) or (queriedIP == ipKey):
+                                        tempStr = f"the IP we're looking for ({queriedIP}) is used in a destination object in the rule {rule['name']} in the ACPolicy named {acPolicy['name']}"
+                                        if tempStr not in policyMatches:
+                                            policyMatches.append(tempStr)
+    
+    print(f"outputs for queried IP {queriedIP}:")
+    for match in policyMatches:
+        print(match)
+    
