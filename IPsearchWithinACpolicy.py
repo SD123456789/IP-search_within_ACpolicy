@@ -55,6 +55,7 @@ import ipaddress
 import json
 import pprint
 import re
+from typing import ValuesView
 import requests
 import sys
 import os
@@ -205,19 +206,44 @@ if __name__ == "__main__":
             raise SystemExit(err)
 
 
-
+    # create a dictionary to store any matching objects
+    ipMatches = defaultdict(list)
 
     # next find the IP we are looking for from within that list 
     # of objects if it exists and store the object id for further processing
     for ip in ipDict:
         try:
-            if queriedIP.subnet_of(ip):
-                print(f"{queriedIP} can be found in {ipDict[ip]}") 
+            if queriedIP.subnet_of(ip) or (queriedIP == ip):
+                ipMatches.update({ip:ipDict[ip]})
         except TypeError:
             pass
 
-    # still need to do the following:
-    #   1. determine if the IP being searched for exists within objects
-    #       1a. if exists in objects, add each object into the search list
+    # now doubly iterate through the access control policies and see if the
+    # IP address we are searching for does exist within one of them, either 
+    # as a raw IP or contained within an object
+    for acPolicy in acPolicies['items']:
+        for acpKey, acpValue in acPolicy['rules'].items():
+            if (acpKey == 'items'):
+                for rule in acpValue:
+                    if 'sourceNetworks' in rule:
+                        if 'literals' in rule['sourceNetworks']:
+                            for literal in rule['sourceNetworks']['literals']:
+                                if queriedIP.subnet_of(ipaddress.ip_network(literal['value'])) or (queriedIP == ipaddress.ip_network(literal['value'])):
+                                    print(f"the IP we're looking for ({queriedIP}) is used in the rule {rule['name']} in the ACPolicy named {acPolicy['name']}")
+                                    ipMatches.update({ipaddress.ip_network(literal['value']):[rule['name'],acPolicy['name']]})
+                        if 'objects' in rule['sourceNetworks']:
+#                            print(f"source objects are: {rule['sourceNetworks']['objects']}")
+                            pass
+                    if 'destinationNetworks' in rule:
+                        if 'literals' in rule['destinationNetworks']:
+                            for literal in rule['destinationNetworks']['literals']:
+                                if queriedIP.subnet_of(ipaddress.ip_network(literal['value'])) or (queriedIP == ipaddress.ip_network(literal['value'])):
+                                    print(f"the IP we're looking for ({queriedIP}) is used in the rule {rule['name']} in the ACPolicy named {acPolicy['name']}")
+                                    ipMatches.update({ipaddress.ip_network(literal['value']):[rule['name'],acPolicy['name']]})
+                        if 'objects' in rule['destinationNetworks']:
+#                            print(f"dest objects are: {rule['destinationNetworks']['objects']}")
+                            pass
+
+
     #   2. iterate through the list of search matches (IP and objects) against rule contents
-    
+    #pprint.pprint(ipMatches)
