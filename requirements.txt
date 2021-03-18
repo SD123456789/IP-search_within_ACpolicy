@@ -1,11 +1,12 @@
 ###### Requirements to run IPsearchWithinACpolicy.py ######
+### Commented lines are already present in the system.
 argparse
 ipaddress
-json
-pprint
+# json
+# pprint
 requests
-sys
-os
-collections.defaultdict
-requests.models.HTTPError
-requestToken.get_token
+# sys
+# os
+# collections.defaultdict
+# requests.models.HTTPError
+# requestToken.get_token

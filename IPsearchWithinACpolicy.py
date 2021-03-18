@@ -113,6 +113,7 @@ if __name__ == "__main__":
     parser.add_argument("password", type=str, help="password of API user")
     parser.add_argument("ip_of_fmc", type=str, help="IP of FMC")
     parser.add_argument("ip_to_search", type=str, help="IP that is being searched for")
+    parser.add_argument("-e", "--expanded", action="store_true", help="If this flag is used, output the entire rule instead of just the rule name.")
     args = parser.parse_args()
 
 
@@ -121,6 +122,7 @@ if __name__ == "__main__":
     passwd = args.password
     fmcIP = args.ip_of_fmc
     queriedIP = args.ip_to_search
+    expanded = args.expanded
 
     # let's first make sure that the IP address we're looking for is legitimate
     try:
@@ -230,32 +232,44 @@ if __name__ == "__main__":
                         if 'literals' in rule['sourceNetworks']:
                             for literal in rule['sourceNetworks']['literals']:
                                 if queriedIP.subnet_of(ipaddress.ip_network(literal['value'])) or (queriedIP == ipaddress.ip_network(literal['value'])):
-                                    tempStr = f"the IP we're looking for ({queriedIP}) is used in a source network in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{rule}"
+                                    if expanded:
+                                        tempStr = f"the IP we are looking for ({queriedIP}) is used as a source network in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{json.dumps(rule,sort_keys=True, indent=4)}"
+                                    else:
+                                        tempStr = f"the IP we are looking for ({queriedIP}) is used as a source network in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}, {rule['name']}"
                                     if tempStr not in policyMatches:
                                         policyMatches.append(tempStr)
                         if 'objects' in rule['sourceNetworks']:
                             for ipKey, ipValue in ipMatches.items():
                                 for object in rule['sourceNetworks']['objects']:
                                     if queriedIP.subnet_of(ipKey) or (queriedIP == ipKey):
-                                        tempStr = f"the IP we're looking for ({queriedIP}) is used in a source object in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{rule}"
+                                        if expanded:
+                                            tempStr = f"the IP we are looking for ({queriedIP}) is used as a source object in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{json.dumps(rule,sort_keys=True, indent=4)}"
+                                        else:
+                                            tempStr = f"the IP we are looking for ({queriedIP}) is used as a source object in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}, {rule['name']}"
                                         if tempStr not in policyMatches:
                                             policyMatches.append(tempStr)
                     if 'destinationNetworks' in rule:
                         if 'literals' in rule['destinationNetworks']:
                             for literal in rule['destinationNetworks']['literals']:
                                 if queriedIP.subnet_of(ipaddress.ip_network(literal['value'])) or (queriedIP == ipaddress.ip_network(literal['value'])):
-                                    tempStr = f"the IP we're looking for ({queriedIP}) is used in a destination network in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{rule}"
+                                    if expanded:
+                                        tempStr = f"the IP we are looking for ({queriedIP}) is used as a destination network in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{json.dumps(rule,sort_keys=True, indent=4)}"
+                                    else:
+                                        tempStr = f"the IP we are looking for ({queriedIP}) is used as a destination network in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}, {rule['name']}"
                                     if tempStr not in policyMatches:
                                         policyMatches.append(tempStr)
                         if 'objects' in rule['destinationNetworks']:
                             for ipKey, ipValue in ipMatches.items():
                                 for object in rule['destinationNetworks']['objects']:
                                     if queriedIP.subnet_of(ipKey) or (queriedIP == ipKey):
-                                        tempStr = f"the IP we're looking for ({queriedIP}) is used in a destination object in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{rule}"
+                                        if expanded:
+                                            tempStr = f"the IP we are looking for ({queriedIP}) is used as a destination object in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{json.dumps(rule,sort_keys=True, indent=4)}"
+                                        else:
+                                            tempStr = f"the IP we are looking for ({queriedIP}) is used as a destination object in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}, {rule['name']}"
                                         if tempStr not in policyMatches:
                                             policyMatches.append(tempStr)
     
-    print(f"outputs for queried IP {queriedIP}:")
+    print(f"---------------------\_* RESULTS *_/---------------------")
     for match in policyMatches:
         print(match)
     

@@ -1,14 +1,25 @@
-# API-versions-accepted
+# IPsearchWithinACpolicy
 
-**apiGET.py** is a python3 script that makes use of the requests module to ask the target server what APIVersions it accepts.  
-There is only one input (first command line argument) which is an IP address.  
-The accepted API versions are the output.  
-This script can be executed on any platform that has python3 installed and the requests plugin installed.
+**IPsearchWithinACpolicy.py** 
+
+Input(s): 
+    username,
+    password,
+    IP address of FMC,
+    IP address you are looking for
+
+Output(s):
+    Name of the Access Control Policy and the specific Access Control Policy Rule that contains the IP address (if it exists).
+
+Author: Sudhir H Desai <suddesai@cisco.com>
+This script can be executed on any platform that has python3 installed and the dependencies from **requirements.txt** installed.
  
 
 ## Use Case Description
 
-This script assists an API developer to determine which API versions are accepted with a specific Firepower Defense Manager console.  
+This is a python script that makes use of the requests module to search within all Access Control Policies within a single Firepower Management Center for a specified IP. 
+It will GET all network objects and object groups, all Access Control Policies (and associated rules), and then provide 
+
 It can be run from any platform that has python3 installed.
 
 
@@ -27,38 +38,45 @@ No configuration needed. This script is a simple GET request for the accepted AP
 
 ## Usage
 
-To use the **apiGET.py** python script
+To use the **IPsearchWithinACpolicy.py** python script
 
 ```shell
-API-versions-accepted % python3 ./apiGET.py               
-Usage: apiGET.py  <IP address of FTD management interface>
+IP-search_within_ACpolicy % python3 ./IPsearchWithinACpolicy.py
+usage: IPsearchWithinACpolicy.py [-h] username password ip_of_fmc ip_to_search
+IPsearchWithinACpolicy.py: error: the following arguments are required: username, password, ip_of_fmc, ip_to_search
 
-API-versions-accepted % python3 ./apiGET.py 192.168.10.196
-PING 192.168.10.196 (192.168.10.196): 56 data bytes
-64 bytes from 192.168.10.196: icmp_seq=0 ttl=62 time=4.046 ms
 
---- 192.168.10.196 ping statistics ---
+IP-search_within_ACpolicy % python3 IPsearchWithinACpolicy.py apiuser S0urc3f1r3\! testfmc 10.10.10.24   
+PING testfmc (10.10.10.10): 56 data bytes
+64 bytes from 10.10.10.10: icmp_seq=0 ttl=51 time=19.381 ms
+
+--- nemesisfmc.cisco.com ping statistics ---
 1 packets transmitted, 1 packets received, 0.0% packet loss
-round-trip min/avg/max/stddev = 4.046/4.046/4.046/0.000 ms
-/usr/local/lib/python3.8/site-packages/urllib3/connectionpool.py:981: InsecureRequestWarning: Unverified HTTPS request is being made to host '192.168.10.196'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings
-  warnings.warn(
-
-
-The Firepower Device Manager at 192.168.10.196 accepts the following API versions:
-{
-    "supportedVersions":["v5", "v6", "latest"]
-}
+round-trip min/avg/max/stddev = 19.381/19.381/19.381/0.000 ms
+---------------------\_* RESULTS *_/---------------------
+the IP we are looking for (10.10.10.24/32) is used as a source object in the ACPolicy named test0 in rule #10, Person - Basic Purple Block
+the IP we are looking for (10.10.10.24/32) is used as a destination object in the ACPolicy named test1 in rule #1, TestingFQDN
+the IP we are looking for (10.10.10.24/32) is used as a source object in the ACPolicy named test1 in rule #11, Person - Basic Purple Block
+the IP we are looking for (10.10.10.24/32) is used as a source network in the ACPolicy named test2 in rule #1, TestingIP
 ```
 
 ## How to test the software
 
-For testing, please review the "apiGETtest.py" script bundled in this repo.
-You will need to edit the unittest script for valid and invalid IP addresses in your environment.
-
-To run the testing script, enter the following at the command-line and press return:
+For testing, please review the help text outputted by the script:
 ```shell
-API-versions-accepted % python3 ./apiGETtest.py
-```
+IP-search_within_ACpolicy % python3 ./IPsearchWithinACpolicy.py -h
+usage: IPsearchWithinACpolicy.py [-h] [-e] username password ip_of_fmc ip_to_search
+
+positional arguments:
+  username        API username
+  password        password of API user
+  ip_of_fmc       IP of FMC
+  ip_to_search    IP that is being searched for
+
+optional arguments:
+  -h, --help      show this help message and exit
+  -e, --expanded  If this flag is used, output the entire rule instead of just the rule name.
+  ```
 
 
 ## Getting help
