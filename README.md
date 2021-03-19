@@ -12,7 +12,7 @@ Output(s):
     Name of the Access Control Policy and the specific Access Control Policy Rule that contains the IP address (if it exists).
 
 Author: Sudhir H Desai <suddesai@cisco.com>
-This script can be executed on any platform that has python3 installed and the dependencies from **requirements.txt** installed.
+
  
 
 ## Use Case Description
@@ -20,7 +20,7 @@ This script can be executed on any platform that has python3 installed and the d
 This is a python script that makes use of the requests module to search within all Access Control Policies within a single Firepower Management Center for a specified IP. 
 It will GET all network objects and object groups, all Access Control Policies (and associated rules), and then provide 
 
-It can be run from any platform that has python3 installed.
+This script can be executed on any platform that has python3 installed and the dependencies from **requirements.txt** installed.
 
 
 ## Installation
