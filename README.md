@@ -78,6 +78,8 @@ optional arguments:
   -e, --expanded  If this flag is used, output the entire rule instead of just the rule name.
   ```
 
+You can use the [FMC sandbox](https://devnetsandbox.cisco.com/RM/Diagram/Index/1228cb22-b2ba-48d3-a70a-86a53f4eecc0?diagramType=Topology) or the Firepower Management Center [API Learning Labs](https://developer.cisco.com/learning/lab/firepower-restapi-101/step/1) if you need to access an FMC.
+
 
 ## Getting help
 
