@@ -12,7 +12,7 @@ Author: Sudhir H Desai <suddesai@cisco.com>
 
 License: BSD 3-Clause License
 
-Copyright (c) 2020, Cisco Systems, Inc. and/or its affiliates
+Copyright (c) 2021, Cisco Systems, Inc. and/or its affiliates
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
