@@ -42,11 +42,11 @@ To use the **IPsearchWithinACpolicy.py** python script
 
 ```shell
 IP-search_within_ACpolicy % python3 ./IPsearchWithinACpolicy.py
-usage: IPsearchWithinACpolicy.py [-h] username password ip_of_fmc ip_to_search
-IPsearchWithinACpolicy.py: error: the following arguments are required: username, password, ip_of_fmc, ip_to_search
+usage: IPsearchWithinACpolicy.py [-h] [-u USERNAME] [-p PASSWORD] [-e] ip_of_fmc ip_to_search
+IPsearchWithinACpolicy.py: error: the following arguments are required: ip_of_fmc, ip_to_search
 
 
-IP-search_within_ACpolicy % python3 IPsearchWithinACpolicy.py apiuser S0urc3f1r3\! testfmc 10.10.10.24   
+IP-search_within_ACpolicy % python3 IPsearchWithinACpolicy.py -u apiuser -p S0urc3f1r3\! testfmc 10.10.10.24   
 PING testfmc (10.10.10.10): 56 data bytes
 64 bytes from 10.10.10.10: icmp_seq=0 ttl=51 time=19.381 ms
 
@@ -65,17 +65,19 @@ the IP we are looking for (10.10.10.24/32) is used as a source network in the AC
 For testing, please review the help text outputted by the script:
 ```shell
 IP-search_within_ACpolicy % python3 ./IPsearchWithinACpolicy.py -h
-usage: IPsearchWithinACpolicy.py [-h] [-e] username password ip_of_fmc ip_to_search
+usage: IPsearchWithinACpolicy.py [-h] [-u USERNAME] [-p PASSWORD] [-e] ip_of_fmc ip_to_search
 
 positional arguments:
-  username        API username
-  password        password of API user
-  ip_of_fmc       IP of FMC
-  ip_to_search    IP that is being searched for
+  ip_of_fmc             IP of FMC
+  ip_to_search          IP that is being searched for
 
 optional arguments:
-  -h, --help      show this help message and exit
-  -e, --expanded  If this flag is used, output the entire rule instead of just the rule name.
+  -h, --help            show this help message and exit
+  -u USERNAME, --username USERNAME
+                        API username
+  -p PASSWORD, --password PASSWORD
+                        password of API user
+  -e, --expanded        If this flag is used, output the entire rule instead of just the rule name.
   ```
 
 You can use the [FMC sandbox](https://devnetsandbox.cisco.com/RM/Diagram/Index/1228cb22-b2ba-48d3-a70a-86a53f4eecc0?diagramType=Topology) or the Firepower Management Center [API Learning Labs](https://developer.cisco.com/learning/lab/firepower-restapi-101/step/1) if you need to access an FMC.

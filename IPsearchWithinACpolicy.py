@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import argparse
+import getpass
 import ipaddress
 import json
 import pprint
@@ -108,17 +109,27 @@ if __name__ == "__main__":
     # first set up the command line arguments and parse them
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("username", type=str, help ="API username")
-    parser.add_argument("password", type=str, help="password of API user")
+    parser.add_argument("-u", "--username", type=str, help ="API username")
+    parser.add_argument("-p", "--password", type=str, help="password of API user")
     parser.add_argument("ip_of_fmc", type=str, help="IP of FMC")
     parser.add_argument("ip_to_search", type=str, help="IP that is being searched for")
     parser.add_argument("-e", "--expanded", action="store_true", help="If this flag is used, output the entire rule instead of just the rule name.")
     args = parser.parse_args()
 
 
-    # set needed variables to generate a token
-    user = args.username
-    passwd = args.password
+    # set needed variables to generate a token or create them
+    if (args.username):
+        user = args.username
+    else:
+        user = str(input("API Username: "))
+    if (args.password):
+        passwd = args.password
+    else:
+        try:
+            passwd = getpass.getpass(prompt="API Password: ", stream=None)
+        except getpass.GetPassWarning as err:
+            print(f"{err} happened to your password in")
+            exit(1)
     fmcIP = args.ip_of_fmc
     queriedIP = args.ip_to_search
     expanded = args.expanded
