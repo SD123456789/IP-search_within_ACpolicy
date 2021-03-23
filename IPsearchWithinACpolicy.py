@@ -68,8 +68,7 @@ def FMCexists(fmcIP):
 
     # make sure IP exists
     if (os.system(f"ping -c 1 -t 1 {str(fmcIP)}") != 0):
-        print("Please enter a useable IP address.\n")
-        sys.exit(1)
+        print(f"Please note that {fmcIP} cannot be pinged and may result in further script errors.")
 
     # lets disable the certificate warning first (this is NOT advised in prod)
     from requests.packages.urllib3.exceptions import InsecureRequestWarning
