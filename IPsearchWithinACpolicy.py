@@ -5,14 +5,16 @@ File: IPsearchWithinACpolicy.py
 Usage: is a python script that makes use of the requests
     module to search within an Access Control Policy for a specified IP.
 
-    ./IPsearchWithinACpolicy.py [-h] [-u USERNAME] [-p PASSWORD] [-f FMC] [-i SEARCH] [-e]
-    python3 ./IPsearchWithinACpolicy.py [-h] [-u USERNAME] [-p PASSWORD] [-f FMC] [-i SEARCH] [-e]
+    ./IPsearchWithinACpolicy.py [-h] [-u USERNAME] [-p PASSWORD] [-f FMC] [-i SEARCH] [-e] [-c]
+    python3 ./IPsearchWithinACpolicy.py [-h] [-u USERNAME] [-p PASSWORD] [-f FMC] [-i SEARCH] [-e] [-c]
 
 Inputs: 
     username,
     password,
     IP address of FMC,
-    IP address you are looking for
+    IP address you are looking for,
+    whether to compact the output,
+    whether to expand the output
 
 Outputs:
     Name of the Access Control Policy and Rule that contains the IP address (if it exists)
@@ -131,6 +133,19 @@ def containsIP(someObject):
                 contained = True
     return contained
 
+def expandedTxt(whereIsIt):
+    if expanded:
+        tempStr =  f":\n{json.dumps(rule,sort_keys=True, indent=4)}"
+    elif compacted:
+        tempStr = f", {rule['name']}"
+    else:
+        if "source" in whereIsIt:
+            tempStr = f":\n{json.dumps(rule['sourceNetworks'], sort_keys=True, indent=4)}"
+        else:
+            tempStr = f":\n{json.dumps(rule['destinationNetworks'], sort_keys=True, indent=4)}"
+    return f"the IP we are looking for ({queriedIP}) is used as a {whereIsIt} in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}" + tempStr
+
+
 if __name__ == "__main__":
     # first set up the command line arguments and parse them
     parser = argparse.ArgumentParser(
@@ -139,7 +154,8 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--password", type=str, help="password of API user")
     parser.add_argument("-f", "--fmc", type=str, help="IP of FMC")
     parser.add_argument("-i", "--search", type=str, help="IP that is being searched for")
-    parser.add_argument("-e", "--expanded", action="store_true", help="If this flag is used, output the entire rule instead of just the rule name.")
+    parser.add_argument("-c", "--compacted", action="store_true", help="If this flag is used, output just the rule name.")
+    parser.add_argument("-e", "--expanded", action="store_true", help="If this flag is used, output the entire rule.")
     args = parser.parse_args()
 
 
@@ -164,6 +180,7 @@ if __name__ == "__main__":
         queriedIP = args.search
     else:
         queriedIP = ipaddress.ip_network(input("IP to search: "))
+    compacted = args.compacted
     expanded = args.expanded
 
     # let's first make sure that the IP address we're looking for is legitimate
@@ -274,42 +291,30 @@ if __name__ == "__main__":
                         if 'literals' in rule['sourceNetworks']:
                             for literal in rule['sourceNetworks']['literals']:
                                 if containsIP(literal):
-                                    if expanded:
-                                        tempStr = f"the IP we are looking for ({queriedIP}) is used as a source network in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{json.dumps(rule,sort_keys=True, indent=4)}"
-                                    else:
-                                        tempStr = f"the IP we are looking for ({queriedIP}) is used as a source network in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}, {rule['name']}"
-                                    if tempStr not in policyMatches:
-                                        policyMatches.append(tempStr)
+                                    strToAdd = expandedTxt("source network")
+                                    if strToAdd not in policyMatches:
+                                        policyMatches.append(strToAdd)
                         if 'objects' in rule['sourceNetworks']:
                             for ipKey, ipValue in ipMatches.items():
                                 for object in rule['sourceNetworks']['objects']:
                                     if containsIP(ipKey):
-                                        if expanded:
-                                            tempStr = f"the IP we are looking for ({queriedIP}) is used as a source object in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{json.dumps(rule,sort_keys=True, indent=4)}"
-                                        else:
-                                            tempStr = f"the IP we are looking for ({queriedIP}) is used as a source object in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}, {rule['name']}"
-                                        if tempStr not in policyMatches:
-                                            policyMatches.append(tempStr)
+                                        strToAdd = expandedTxt("source object")
+                                        if strToAdd not in policyMatches:
+                                            policyMatches.append(strToAdd)
                     if 'destinationNetworks' in rule:
                         if 'literals' in rule['destinationNetworks']:
                             for literal in rule['destinationNetworks']['literals']:
                                 if containsIP(literal):
-                                    if expanded:
-                                        tempStr = f"the IP we are looking for ({queriedIP}) is used as a destination network in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{json.dumps(rule,sort_keys=True, indent=4)}"
-                                    else:
-                                        tempStr = f"the IP we are looking for ({queriedIP}) is used as a destination network in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}, {rule['name']}"
-                                    if tempStr not in policyMatches:
-                                        policyMatches.append(tempStr)
+                                    strToAdd = expandedTxt("destination network")
+                                    if strToAdd not in policyMatches:
+                                        policyMatches.append(strToAdd)
                         if 'objects' in rule['destinationNetworks']:
                             for ipKey, ipValue in ipMatches.items():
                                 for object in rule['destinationNetworks']['objects']:
                                     if containsIP(ipKey):
-                                        if expanded:
-                                            tempStr = f"the IP we are looking for ({queriedIP}) is used as a destination object in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}:\n{json.dumps(rule,sort_keys=True, indent=4)}"
-                                        else:
-                                            tempStr = f"the IP we are looking for ({queriedIP}) is used as a destination object in the ACPolicy named {acPolicy['name']} in rule #{rule['metadata']['ruleIndex']}, {rule['name']}"
-                                        if tempStr not in policyMatches:
-                                            policyMatches.append(tempStr)
+                                        strToAdd = expandedTxt("destination object")
+                                        if strToAdd not in policyMatches:
+                                            policyMatches.append(strToAdd)
     
     print(f"---------------------\_* RESULTS *_/---------------------")
     for match in policyMatches:
