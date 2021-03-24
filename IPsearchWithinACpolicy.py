@@ -5,8 +5,8 @@ File: IPsearchWithinACpolicy.py
 Usage: is a python script that makes use of the requests
     module to search within an Access Control Policy for a specified IP.
 
-    ./IPsearchWithinACpolicy.py <username> <password> <IP address of FMC> <IP address you are looking for>
-    python3 ./IPsearchWithinACpolicy.py <username> <password> <IP address of FMC> <IP address you are looking for>
+    ./IPsearchWithinACpolicy.py [-h] [-u USERNAME] [-p PASSWORD] [-f FMC] [-i SEARCH] [-e]
+    python3 ./IPsearchWithinACpolicy.py [-h] [-u USERNAME] [-p PASSWORD] [-f FMC] [-i SEARCH] [-e]
 
 Inputs: 
     username,
@@ -15,7 +15,7 @@ Inputs:
     IP address you are looking for
 
 Outputs:
-    Name of the Access Control Policy that contains the IP address (if it exists)
+    Name of the Access Control Policy and Rule that contains the IP address (if it exists)
 
 Author: Sudhir H Desai <suddesai@cisco.com>
 
@@ -68,7 +68,7 @@ from requestToken import get_token
 def FMCexists(fmcIP):
 
     # make sure IP exists
-    if (os.system(f"ping -c 1 -t 1 {str(fmcIP)}") != 0):
+    if (os.system(f"ping -c 1 -t 1 {fmcIP}") != 0):
         print(f"Please note that {fmcIP} cannot be pinged and may result in further script errors.")
 
     # lets disable the certificate warning first (this is NOT advised in prod)
@@ -77,7 +77,7 @@ def FMCexists(fmcIP):
 
     # getting valid versions using the built-in module exceptions to handle errors
     try:
-        r = requests.get('https://{}//api/fmc_platform/v1/info/serverversion'.format(str(fmcIP)), verify=False)
+        r = requests.get(f"https://{fmcIP}//api/fmc_platform/v1/info/serverversion", verify=False)
 
     except:
         print(f"The IP address at {fmcIP} has no exposed API and has returned a {r.status_code} error.")
@@ -111,8 +111,8 @@ if __name__ == "__main__":
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-u", "--username", type=str, help ="API username")
     parser.add_argument("-p", "--password", type=str, help="password of API user")
-    parser.add_argument("ip_of_fmc", type=str, help="IP of FMC")
-    parser.add_argument("ip_to_search", type=str, help="IP that is being searched for")
+    parser.add_argument("-f", "--fmc", type=str, help="IP of FMC")
+    parser.add_argument("-i", "--search", type=str, help="IP that is being searched for")
     parser.add_argument("-e", "--expanded", action="store_true", help="If this flag is used, output the entire rule instead of just the rule name.")
     args = parser.parse_args()
 
@@ -130,8 +130,14 @@ if __name__ == "__main__":
         except getpass.GetPassWarning as err:
             print(f"{err} happened to your password in")
             exit(1)
-    fmcIP = args.ip_of_fmc
-    queriedIP = args.ip_to_search
+    if (args.fmc):
+        fmcIP = ipaddress.ip_address(args.fmc)
+    else:
+        fmcIP = ipaddress.ip_address(input("IP of FMC: "))
+    if (args.search):
+        queriedIP = args.search
+    else:
+        queriedIP = ipaddress.ip_network(input("IP to search: "))
     expanded = args.expanded
 
     # let's first make sure that the IP address we're looking for is legitimate

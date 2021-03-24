@@ -41,22 +41,17 @@ No configuration needed. This script is a simple GET request for the accepted AP
 To use the **IPsearchWithinACpolicy.py** python script
 
 ```shell
-IP-search_within_ACpolicy % python3 ./IPsearchWithinACpolicy.py
-usage: IPsearchWithinACpolicy.py [-h] [-u USERNAME] [-p PASSWORD] [-e] ip_of_fmc ip_to_search
-IPsearchWithinACpolicy.py: error: the following arguments are required: ip_of_fmc, ip_to_search
-
-
-IP-search_within_ACpolicy % python3 IPsearchWithinACpolicy.py -u apiuser -p S0urc3f1r3\! testfmc 10.10.10.24   
+IP-search_within_ACpolicy % python3 ./IPsearchWithinACpolicy.py -u apiuser -p S0urc3f1r3\! -f 10.10.10.10 -i 10.10.10.24   
 PING testfmc (10.10.10.10): 56 data bytes
 64 bytes from 10.10.10.10: icmp_seq=0 ttl=51 time=19.381 ms
 
---- nemesisfmc.cisco.com ping statistics ---
+--- 10.10.10.10 ping statistics ---
 1 packets transmitted, 1 packets received, 0.0% packet loss
 round-trip min/avg/max/stddev = 19.381/19.381/19.381/0.000 ms
 ---------------------\_* RESULTS *_/---------------------
-the IP we are looking for (10.10.10.24/32) is used as a source object in the ACPolicy named test0 in rule #10, Person - Basic Purple Block
+the IP we are looking for (10.10.10.24/32) is used as a source object in the ACPolicy named test0 in rule #10, Person - Basic Block
 the IP we are looking for (10.10.10.24/32) is used as a destination object in the ACPolicy named test1 in rule #1, TestingFQDN
-the IP we are looking for (10.10.10.24/32) is used as a source object in the ACPolicy named test1 in rule #11, Person - Basic Purple Block
+the IP we are looking for (10.10.10.24/32) is used as a source object in the ACPolicy named test1 in rule #11, Person - Basic Block
 the IP we are looking for (10.10.10.24/32) is used as a source network in the ACPolicy named test2 in rule #1, TestingIP
 ```
 
@@ -65,11 +60,7 @@ the IP we are looking for (10.10.10.24/32) is used as a source network in the AC
 For testing, please review the help text outputted by the script:
 ```shell
 IP-search_within_ACpolicy % python3 ./IPsearchWithinACpolicy.py -h
-usage: IPsearchWithinACpolicy.py [-h] [-u USERNAME] [-p PASSWORD] [-e] ip_of_fmc ip_to_search
-
-positional arguments:
-  ip_of_fmc             IP of FMC
-  ip_to_search          IP that is being searched for
+usage: IPsearchWithinACpolicy.py [-h] [-u USERNAME] [-p PASSWORD] [-f FMC] [-i SEARCH] [-e]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -77,6 +68,9 @@ optional arguments:
                         API username
   -p PASSWORD, --password PASSWORD
                         password of API user
+  -f FMC, --fmc FMC     IP of FMC
+  -i SEARCH, --search SEARCH
+                        IP that is being searched for
   -e, --expanded        If this flag is used, output the entire rule instead of just the rule name.
   ```
 
