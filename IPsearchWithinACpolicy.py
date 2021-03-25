@@ -68,11 +68,6 @@ from requestToken import get_token
 
 
 def FMCexists(fmcIP):
-
-    # make sure IP exists
-    if (os.system(f"ping -c 1 -t 1 {fmcIP}") != 0):
-        print(f"Please note that {fmcIP} cannot be pinged and may result in further script errors.")
-
     # lets disable the certificate warning first (this is NOT advised in prod)
     from requests.packages.urllib3.exceptions import InsecureRequestWarning
     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -118,6 +113,13 @@ def containsIP(someObject):
             for ip in ipRange:
                IPs.extend(list(ip))
             ipEquivalent = IPs
+        elif (someObject['type'] == "FQDN"):
+            # check to see if the ip matches the FQDN
+            try:
+                result = socket.gethostbyname_ex(someObject['name'])
+                print(repr(result))
+            except:
+                pass
         else:
             ipEquivalent = ipaddress.ip_network(someObject['value'])
         if (type(ipEquivalent) == list):
@@ -205,49 +207,49 @@ if __name__ == "__main__":
     except Exception as err:
         raise SystemExit(err)
 
-    """ GETTING NETWORK OBJECTS """
-    # get all networkgroups from the FMC
-    # set the path to the network groups and expand them for values
-    apiPath = "object/networkgroups?expanded=true"
-    try:
-        networkObjectGroups = getFunction(fmcIP, apiPath, authHeader)
-    except Exception as err:
-        raise SystemExit(err)
+    # """ GETTING NETWORK OBJECTS """
+    # # get all networkgroups from the FMC
+    # # set the path to the network groups and expand them for values
+    # apiPath = "object/networkgroups?expanded=true"
+    # try:
+    #     networkObjectGroups = getFunction(fmcIP, apiPath, authHeader)
+    # except Exception as err:
+    #     raise SystemExit(err)
 
-    # next grab all network objects from the FMC
-    # set the path to get network objects and expand them for values
-    apiPath = "object/networks?expanded=true"
-    try:
-        networkObjects = getFunction(fmcIP, apiPath, authHeader)
-    except Exception as err:
-        raise SystemExit(err)
+    # # next grab all network objects from the FMC
+    # # set the path to get network objects and expand them for values
+    # apiPath = "object/networks?expanded=true"
+    # try:
+    #     networkObjects = getFunction(fmcIP, apiPath, authHeader)
+    # except Exception as err:
+    #     raise SystemExit(err)
 
-    # then pull all IP addresses from each network object and object group
-    # saving them in a dict of the form object:[list, of, IPs]
+    # # then pull all IP addresses from each network object and object group
+    # # saving them in a dict of the form object:[list, of, IPs]
     ipDict = defaultdict(list)
-    for networkObjectGroup in networkObjectGroups['items']:
-        if networkObjectGroup.get('literals') != None:
-            if len(networkObjectGroup['literals']) > 1:
-                for literal in networkObjectGroup['literals']:
-                    ipDict[ipaddress.ip_network(literal['value'])].extend([networkObjectGroup['id'], networkObjectGroup['name']])
-            else:
-                ipDict[ipaddress.ip_network(networkObjectGroup['literals'][0]['value'])].extend([networkObjectGroup['id'], networkObjectGroup['name']])
+    # for networkObjectGroup in networkObjectGroups['items']:
+    #     if networkObjectGroup.get('literals') != None:
+    #         if len(networkObjectGroup['literals']) > 1:
+    #             for literal in networkObjectGroup['literals']:
+    #                 ipDict[ipaddress.ip_network(literal['value'])].extend([networkObjectGroup['id'], networkObjectGroup['name']])
+    #         else:
+    #             ipDict[ipaddress.ip_network(networkObjectGroup['literals'][0]['value'])].extend([networkObjectGroup['id'], networkObjectGroup['name']])
 
-    for networkObject in networkObjects['items']:
-        ipDict[ipaddress.ip_network(networkObject['value'])].extend([networkObject['id'], networkObjectGroup['name']])
+    # for networkObject in networkObjects['items']:
+    #     ipDict[ipaddress.ip_network(networkObject['value'])].extend([networkObject['id'], networkObjectGroup['name']])
 
 
-    """ GETTING HOSTS """
-    # change the path 
-    apiPath = "object/hosts?expanded=true"
-    try:
-        hostObjects = getFunction(fmcIP, apiPath, authHeader)
-    except Exception as err:
-        raise SystemExit(err)
+    # """ GETTING HOSTS """
+    # # change the path 
+    # apiPath = "object/hosts?expanded=true"
+    # try:
+    #     hostObjects = getFunction(fmcIP, apiPath, authHeader)
+    # except Exception as err:
+    #     raise SystemExit(err)
 
-    # add the hosts to the dictionary
-    for hostObject in hostObjects['items']:
-        ipDict[ipaddress.ip_network(hostObject['value'])].extend([hostObject['id'], hostObject['name']])
+    # # add the hosts to the dictionary
+    # for hostObject in hostObjects['items']:
+    #     ipDict[ipaddress.ip_network(hostObject['value'])].extend([hostObject['id'], hostObject['name']])
 
     """ GRABBING ACCESS CONTROL POLICIES and RULES """
     # change the path and download all AC policies
@@ -274,6 +276,7 @@ if __name__ == "__main__":
     # of objects if it exists and store the object id for further processing
     for ip in ipDict:
         try:
+            print(f"{ip}:{ipDict[ip]}")
             if queriedIP.subnet_of(ip) or (queriedIP == ip):
                 ipMatches.update({ip:ipDict[ip]})
         except TypeError:
