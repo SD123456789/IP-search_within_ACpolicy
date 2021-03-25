@@ -114,12 +114,13 @@ def containsIP(someObject):
                IPs.extend(list(ip))
             ipEquivalent = IPs
         elif (someObject['type'] == "FQDN"):
-            # check to see if the ip matches the FQDN
-            try:
-                result = socket.gethostbyname_ex(someObject['name'])
-                print(repr(result))
-            except:
-                pass
+            # don't do anything here yet... this may be changed, but for now don't handle FQDNs
+            # # check to see if the ip matches the FQDN
+            # try:
+            #     result = socket.gethostbyname_ex(someObject['name'])
+            #     print(repr(result))
+            # except:
+            #     pass
         else:
             ipEquivalent = ipaddress.ip_network(someObject['value'])
         if (type(ipEquivalent) == list):
@@ -132,8 +133,10 @@ def containsIP(someObject):
     except:
         # try block will throw an exception if this is an object
         if queriedIP.subnet_of(someObject) or (queriedIP == someObject):
-                contained = True
+            # print(f"{someObject} is contained in {object} with {ipValue}")
+            contained = True
     return contained
+
 
 def expandedTxt(whereIsIt):
     if expanded:
@@ -207,49 +210,49 @@ if __name__ == "__main__":
     except Exception as err:
         raise SystemExit(err)
 
-    # """ GETTING NETWORK OBJECTS """
-    # # get all networkgroups from the FMC
-    # # set the path to the network groups and expand them for values
-    # apiPath = "object/networkgroups?expanded=true"
-    # try:
-    #     networkObjectGroups = getFunction(fmcIP, apiPath, authHeader)
-    # except Exception as err:
-    #     raise SystemExit(err)
+    """ GETTING NETWORK OBJECTS """
+    # get all networkgroups from the FMC
+    # set the path to the network groups and expand them for values
+    apiPath = "object/networkgroups?expanded=true"
+    try:
+        networkObjectGroups = getFunction(fmcIP, apiPath, authHeader)
+    except Exception as err:
+        raise SystemExit(err)
 
-    # # next grab all network objects from the FMC
-    # # set the path to get network objects and expand them for values
-    # apiPath = "object/networks?expanded=true"
-    # try:
-    #     networkObjects = getFunction(fmcIP, apiPath, authHeader)
-    # except Exception as err:
-    #     raise SystemExit(err)
+    # next grab all network objects from the FMC
+    # set the path to get network objects and expand them for values
+    apiPath = "object/networks?expanded=true"
+    try:
+        networkObjects = getFunction(fmcIP, apiPath, authHeader)
+    except Exception as err:
+        raise SystemExit(err)
 
-    # # then pull all IP addresses from each network object and object group
-    # # saving them in a dict of the form object:[list, of, IPs]
+    # then pull all IP addresses from each network object and object group
+    # saving them in a dict of the form object:[list, of, IPs]
     ipDict = defaultdict(list)
-    # for networkObjectGroup in networkObjectGroups['items']:
-    #     if networkObjectGroup.get('literals') != None:
-    #         if len(networkObjectGroup['literals']) > 1:
-    #             for literal in networkObjectGroup['literals']:
-    #                 ipDict[ipaddress.ip_network(literal['value'])].extend([networkObjectGroup['id'], networkObjectGroup['name']])
-    #         else:
-    #             ipDict[ipaddress.ip_network(networkObjectGroup['literals'][0]['value'])].extend([networkObjectGroup['id'], networkObjectGroup['name']])
+    for networkObjectGroup in networkObjectGroups['items']:
+        if networkObjectGroup.get('literals') != None:
+            if len(networkObjectGroup['literals']) > 1:
+                for literal in networkObjectGroup['literals']:
+                    ipDict[ipaddress.ip_network(literal['value'])].extend({networkObjectGroup['id'] : networkObjectGroup['name']})
+            else:
+                ipDict[ipaddress.ip_network(networkObjectGroup['literals'][0]['value'])].extend({networkObjectGroup['id'] : networkObjectGroup['name']})
 
-    # for networkObject in networkObjects['items']:
-    #     ipDict[ipaddress.ip_network(networkObject['value'])].extend([networkObject['id'], networkObjectGroup['name']])
+    for networkObject in networkObjects['items']:
+        ipDict[ipaddress.ip_network(networkObject['value'])].extend({networkObject['id'] : networkObjectGroup['name']})
 
 
-    # """ GETTING HOSTS """
-    # # change the path 
-    # apiPath = "object/hosts?expanded=true"
-    # try:
-    #     hostObjects = getFunction(fmcIP, apiPath, authHeader)
-    # except Exception as err:
-    #     raise SystemExit(err)
+    """ GETTING HOSTS """
+    # change the path 
+    apiPath = "object/hosts?expanded=true"
+    try:
+        hostObjects = getFunction(fmcIP, apiPath, authHeader)
+    except Exception as err:
+        raise SystemExit(err)
 
-    # # add the hosts to the dictionary
-    # for hostObject in hostObjects['items']:
-    #     ipDict[ipaddress.ip_network(hostObject['value'])].extend([hostObject['id'], hostObject['name']])
+    # add the hosts to the dictionary
+    for hostObject in hostObjects['items']:
+        ipDict[ipaddress.ip_network(hostObject['value'])].extend({hostObject['id'] : hostObject['name']})
 
     """ GRABBING ACCESS CONTROL POLICIES and RULES """
     # change the path and download all AC policies
@@ -276,7 +279,7 @@ if __name__ == "__main__":
     # of objects if it exists and store the object id for further processing
     for ip in ipDict:
         try:
-            print(f"{ip}:{ipDict[ip]}")
+#            print(f"Key: {ip} Value(s):{ipDict[ip]}")
             if queriedIP.subnet_of(ip) or (queriedIP == ip):
                 ipMatches.update({ip:ipDict[ip]})
         except TypeError:
@@ -300,7 +303,7 @@ if __name__ == "__main__":
                         if 'objects' in rule['sourceNetworks']:
                             for ipKey, ipValue in ipMatches.items():
                                 for object in rule['sourceNetworks']['objects']:
-                                    if containsIP(ipKey):
+                                    if (containsIP(ipKey) == True):
                                         strToAdd = expandedTxt("source object")
                                         if strToAdd not in policyMatches:
                                             policyMatches.append(strToAdd)

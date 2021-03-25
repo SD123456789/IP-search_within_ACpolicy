@@ -65,6 +65,10 @@ def get_token(fmcIP, path, username, password):
         raise SystemExit(errh)
     except requests.exceptions.RequestException as err:
         raise SystemExit(err)
+    
+    if (r.status_code < 200) or (r.status_code > 299):
+        print(f"There was an issue with the token request and an error {r.status_code} was returned.")
+        exit(1)
 
     # return the request token by identifying which key:value pairs we need
     required_headers = ('X-auth-access-token', 'X-auth-refresh-token', 'DOMAIN_UUID')
