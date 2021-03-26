@@ -120,7 +120,7 @@ def containsIP(someObject):
             #     result = socket.gethostbyname_ex(someObject['name'])
             #     print(repr(result))
             # except:
-            #     pass
+            pass
         else:
             ipEquivalent = ipaddress.ip_network(someObject['value'])
         if (type(ipEquivalent) == list):
